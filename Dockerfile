@@ -8,4 +8,4 @@ COPY . $APP_HOME
 
 EXPOSE 3000
 
-ENTRYPOINT ["python", "main.py"]
+ENTRYPOINT ["python", "app.py"]
