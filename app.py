@@ -14,7 +14,7 @@ HTTP_IP = '0.0.0.0'
 HTTP_PORT = 3000
 SOCKET_IP = '127.0.0.1'
 SOCKET_PORT = 5000
-STORAGE_DIR = pathlib.Path('storage')
+STORAGE_DIR = BASE_DIR / 'storage'
 FILE_STORAGE = STORAGE_DIR / 'data.json'
 
 
@@ -26,6 +26,10 @@ class HttpHandler(BaseHTTPRequestHandler):
                 self.send_html('index.html')
             case '/message.html':
                 self.send_html('message.html')
+            case '/favicon.ico':
+                self.send_response(204)
+                self.send_header('Content-type', 'text/plain')
+                self.end_headers()
             case _:
                 if pathlib.Path(route.path[:1]).exists():
                     self.send_static(route.path)
@@ -94,21 +98,21 @@ def save_data_to_json(data):
     except ValueError:
         storage = {}
 
-    current_time = str(datetime.now())
-    storage.update({current_time: data_dict})
+    storage.update({str(datetime.now()): data_dict})
 
     with open(FILE_STORAGE, 'w', encoding='utf-8') as f:
         json.dump(storage, f, ensure_ascii=False, indent=2)
 
 
-if __name__ == '__main__':
-    STORAGE_DIR = pathlib.Path().joinpath('storage')
-    FILE_STORAGE = STORAGE_DIR / 'data.json'
+def main():
+    STORAGE_DIR.mkdir(exist_ok=True)
     if not FILE_STORAGE.exists():
         with open(FILE_STORAGE, 'w', encoding='utf-8') as f:
             json.dump({}, f, ensure_ascii=False)
-
     http_server = Thread(target=run_http_server)
     socket_sever = Thread(target=run_socket_server)
     http_server.start()
     socket_sever.start()
+
+if __name__ == '__main__':
+    exit(main())
